@@ -21,7 +21,7 @@ import { FormHelperText } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import UserSelection from "../layouts/UserSelection";
 import axios from 'axios';
-
+import configData from '../../config/config.json';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -112,7 +112,7 @@ export default function EditRoom({
     };
     const _updateRoom = async (data) => {
         const res = await axios.put(
-            `http://localhost:5000/api/rooms/${selectedRoom._id}`,
+            `${configData.SERVER_URL}/api/rooms/${selectedRoom._id}`,
             {
                 roomName: data.roomName,
                 roomType: data.roomType,

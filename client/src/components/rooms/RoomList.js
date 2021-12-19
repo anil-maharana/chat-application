@@ -20,7 +20,7 @@ import { Typography } from '@mui/material';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { removeNotification } from '../../redux/actions/notification';
-
+import configData from '../../config/config.json';
 const RoomList = ({ value, onRoomSelection, notifications, removeNotification }) => {
     const [rooms, setRooms] = useState(value);
     const [addChannelDialog, setAddChannelDialog] = useState(false);
@@ -55,7 +55,7 @@ const RoomList = ({ value, onRoomSelection, notifications, removeNotification })
         }
     };
     const _getMyRooms = async () => {
-        const { data } = await axios.get(`http://localhost:5000/api/users/myRooms`);
+        const { data } = await axios.get(`${configData.SERVER_URL}/api/users/myRooms`);
         setRooms(data);
     }
 

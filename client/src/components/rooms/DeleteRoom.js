@@ -9,7 +9,7 @@ import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import axios from 'axios';
-
+import configData from '../../config/config.json'
 import { Typography } from '@mui/material';
 export default function DeleteRoom({ selectedRoom, isDeleteRoomDialogOpen, onDeleteRoomDialogClose, }) {
     const [open, setOpen] = React.useState(isDeleteRoomDialogOpen);
@@ -27,7 +27,7 @@ export default function DeleteRoom({ selectedRoom, isDeleteRoomDialogOpen, onDel
         _deleteRoom();
     }
     const _deleteRoom = async (data) => {
-        const res = await axios.delete(`http://localhost:5000/api/rooms/${selectedRoom._id}`);
+        const res = await axios.delete(`${configData.SERVER_URL}/api/rooms/${selectedRoom._id}`);
         // console.log(res);
         setLoading(false);
         setOpen(false);

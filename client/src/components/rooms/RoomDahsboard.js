@@ -5,7 +5,7 @@ import RoomsArea from './RoomsArea';
 import axios from 'axios';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-
+import configData from '../../config/config.json'
 const RoomDashBoard = ({ auth: { isAuthenticated, user } }) => {
     const [rooms, setRooms] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
@@ -29,7 +29,7 @@ const RoomDashBoard = ({ auth: { isAuthenticated, user } }) => {
         setLoadingData(true);
         console.log(user);
         if (isAuthenticated === true) {
-            const { data } = await axios.get(`http://localhost:5000/api/users/myRooms`);
+            const { data } = await axios.get(`${configData.SERVER_URL}/api/users/myRooms`);
             setRooms(data);
             console.log(data);
         }
