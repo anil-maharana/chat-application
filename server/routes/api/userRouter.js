@@ -25,17 +25,10 @@ router.get("/", verifyUser, async (req, res) => {
 // @access  private
 router.get("/myRooms", verifyUser, async (req, res) => {
   try {
-    // const _rooms = await Room.find()
-    //     .populate('createdBy', '-password')
-    //     .populate('users', '-password')
-    //     .sort({ lastUpdated: -1 });
-    console.log(req.user);
     const _rooms = await Room.find({
       $or: [{ users: { $in: [req.user.id] } }, { createdBy: req.user.id }],
     })
-      // .find({ users: { $in: [req.user.id] } })
       .sort({ lastUpdated: -1 });
-    console.log(_rooms);
     return res.json(_rooms);
   } catch (error) {
     console.error(error);

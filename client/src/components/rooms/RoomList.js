@@ -21,6 +21,17 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { removeNotification } from "../../redux/actions/notification";
 import configData from "../../config/config.json";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Box from "@mui/material/Box";
+
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Divider from "@mui/material/Divider";
+import Tooltip from "@mui/material/Tooltip";
+import PersonAdd from "@mui/icons-material/PersonAdd";
+import Settings from "@mui/icons-material/Settings";
+import Logout from "@mui/icons-material/Logout";
 const RoomList = ({
   value,
   onRoomSelection,
@@ -34,6 +45,12 @@ const RoomList = ({
 
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedRoomIndex, setSelectedRoomIndex] = React.useState(null);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const handleListItemClick = (event, room, index) => {
     setSelectedRoomIndex(index);
     onRoomSelection(room);
@@ -65,7 +82,9 @@ const RoomList = ({
     );
     setRooms(data);
   };
-
+  const handleMoreOptionIconClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
   return (
     <>
       <div className="rooms">
@@ -92,25 +111,78 @@ const RoomList = ({
                   secondaryAction={
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => {
-                          setSelectedRoom(room);
-                          setEditChannelDialog(true);
+                        aria-label="more"
+                        id="long-button"
+                        aria-controls="long-menu"
+                        aria-expanded={open ? "true" : undefined}
+                        aria-haspopup="true"
+                        onClick={handleMoreOptionIconClick}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleClose}
+                        onClick={handleClose}
+                        PaperProps={{
+                          elevation: 0,
+                          sx: {
+                            overflow: "visible",
+                            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                            mt: 1.5,
+                            "& .MuiAvatar-root": {
+                              width: 32,
+                              height: 32,
+                              ml: -0.5,
+                              mr: 1,
+                            },
+                            "&:before": {
+                              content: '""',
+                              display: "block",
+                              position: "absolute",
+                              top: 0,
+                              right: 14,
+                              width: 10,
+                              height: 10,
+                              bgcolor: "background.paper",
+                              transform: "translateY(-50%) rotate(45deg)",
+                              zIndex: 0,
+                            },
+                          },
+                        }}
+                        transformOrigin={{
+                          horizontal: "right",
+                          vertical: "top",
+                        }}
+                        anchorOrigin={{
+                          horizontal: "right",
+                          vertical: "bottom",
                         }}
                       >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => {
-                          setSelectedRoom(room);
-                          setDeleteChannelDialog(true);
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                        <MenuItem
+                          onClick={() => {
+                            setSelectedRoom(room);
+                            setEditChannelDialog(true);
+                          }}
+                        >
+                          <ListItemIcon>
+                            <EditIcon fontSize="small" />
+                          </ListItemIcon>
+                          Edit
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setSelectedRoom(room);
+                            setDeleteChannelDialog(true);
+                          }}
+                        >
+                          <ListItemIcon>
+                            <DeleteIcon fontSize="small" />
+                          </ListItemIcon>
+                          Delete
+                        </MenuItem>
+                      </Menu>
                     </Stack>
                   }
                   disablePadding
@@ -154,7 +226,7 @@ const RoomList = ({
                 padding: "8px",
                 display: "flex",
                 alignItems: "center",
-               justifyContent:'center'
+                justifyContent: "center",
               }}
             >
               <span style={{ margin: "8px", padding: "8px" }}>
@@ -190,7 +262,7 @@ const RoomList = ({
 
 RoomList.propTypes = {
   notifications: PropTypes.array.isRequired,
-  value: PropTypes.object.isRequired,
+  value: PropTypes.array.isRequired,
   onRoomSelection: PropTypes.func.isRequired,
   removeNotification: PropTypes.func.isRequired,
 };
