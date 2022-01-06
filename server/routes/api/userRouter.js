@@ -42,13 +42,16 @@ router.get("/myRooms", verifyUser, async (req, res) => {
   }
 });
 
-router.get("/getById/:id", async (req, res) => {
+// @route   [GET] api/users/userId
+// @desc    Get all Rooms associated to loggedin user
+// @access  private
+router.get("/:id",verifyUser, async (req, res) => {
   try {
     const userId = req.params.id;
     if (!userId) return res.json({ errorMessage: "Invalid Parameter" });
     // console.log(userId);
-    const { _id, firstName, lastName, email } = await User.findById(userId);
-    res.send({ _id, firstName, lastName, email });
+    const { _id, firstName, lastName, email, avatar } = await User.findById(userId);
+    res.send({ _id, firstName, lastName, email, avatar });
   } catch (error) {
     // console.error(error);
     res.json(false).send();

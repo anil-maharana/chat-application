@@ -82,9 +82,7 @@ const RoomList = ({
     );
     setRooms(data);
   };
-  const handleMoreOptionIconClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const handleMoreOptionIconClick = (event) => {};
   return (
     <>
       <div className="rooms">
@@ -116,7 +114,10 @@ const RoomList = ({
                         aria-controls="long-menu"
                         aria-expanded={open ? "true" : undefined}
                         aria-haspopup="true"
-                        onClick={handleMoreOptionIconClick}
+                        onClick={(event) => {
+                          setAnchorEl(event.currentTarget);
+                          setSelectedRoom(room);
+                        }}
                       >
                         <MoreVertIcon />
                       </IconButton>
@@ -162,7 +163,6 @@ const RoomList = ({
                       >
                         <MenuItem
                           onClick={() => {
-                            setSelectedRoom(room);
                             setEditChannelDialog(true);
                           }}
                         >

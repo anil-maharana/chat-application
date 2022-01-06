@@ -5,12 +5,13 @@ import TextField from "@mui/material/TextField";
 import Avatar from "@mui/material/Avatar";
 import axios from "axios";
 import configData from "../../config/config.json";
+import CircularProgress from "@mui/material/CircularProgress";
 const renderTagFunction = (value, getTagProps) => {
-  return value.map((val) => (
+  return value.map((u) => (
     <Chip
-      key={val._id}
-      avatar={<Avatar src={val.avatar} />}
-      label={`${val.lastName}, ${val.firstName}`}
+      key={u._id}
+      avatar={<Avatar src={u.avatar} />}
+      label={`${u.lastName}, ${u.firstName}`}
       variant="outlined"
     />
   ));
@@ -35,53 +36,111 @@ function UserSelection({
   form: { touched, errors },
   ...props
 }) {
+  const [open, setOpen] = React.useState(false);
+
   const [users, setUsers] = useState([]);
+  const [defaultUsers, setDefaultUsers] = useState([]);
+  const [defaultUsersLoading, setDefaultUsersLoading] = useState(true);
+
+  const loading = open && users.length === 0;
 
   const handleChange = (value) => {
     // this is going to call setFieldValue and manually update values.topcis
     props.onChange("users", value);
   };
 
-  // const handleBlur = () => {
-  //     // this is going to call setFieldTouched and manually update touched.topcis
-  //     props.onBlur('users', true);
-  // };
+  useEffect(() => {
+    _fetchdefaultUsers().then((_) => setDefaultUsersLoading(false));
+    // _fetchAllUsers();
+  }, []);
 
   useEffect(() => {
-    _fetchAllUsers();
-  }, []);
+    let active = true;
+
+    if (!loading) {
+      return undefined;
+    }
+
+    (async () => {
+      const { data } = await axios.get(`${configData.SERVER_URL}/api/users`);
+      setUsers(data);
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [loading]);
+
+  useEffect(() => {
+    if (!open) {
+      setUsers([]);
+    }
+  }, [open]);
+
+  const _fetchdefaultUsers = async () => {
+    const _users = await Promise.all(
+      value.map(async (u) => {
+        const { data } = await axios.get(
+          `${configData.SERVER_URL}/api/users/${u}`
+        );
+        return data;
+      })
+    );
+    setDefaultUsers(_users);
+  };
   const _fetchAllUsers = async () => {
     const { data } = await axios.get(`${configData.SERVER_URL}/api/users`);
     setUsers(data);
   };
   return (
     <div>
-      <Autocomplete
-        multiple
-        onChange={(event, value, reason) => {
-          handleChange(value);
-        }}
-        renderTags={renderTagFunction}
-        // renderOption={renderOptionsFunction}
-        id="tags-outlined"
-        options={users}
-        getOptionLabel={(option) => `${option.lastName}, ${option.firstName}`}
-        defaultValue={value}
-        filterSelectedOptions
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            {...field}
-            {...props}
-            variant="outlined"
-            label={label}
-            name={name}
-            placeholder="Users"
-            error={touched[field.name] && Boolean(errors[field.name])}
-            helperText={errors[field.name]}
-          />
-        )}
-      />
+      {defaultUsersLoading ? (
+        <span>Loading Users.</span>
+      ) : (
+        <Autocomplete
+          multiple
+          open={open}
+          onOpen={() => {
+            setOpen(true);
+          }}
+          onClose={() => {
+            setOpen(false);
+          }}
+          onChange={(event, value, reason) => {
+            handleChange(value);
+          }}
+          options={users}
+          loading={loading}
+          id="tags-outlined"
+          getOptionLabel={(option) => `${option.lastName}, ${option.firstName}`}
+          defaultValue={defaultUsers}
+          renderTags={renderTagFunction}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              {...field}
+              {...props}
+              variant="outlined"
+              label={label}
+              name={name}
+              placeholder="Users"
+              error={touched[field.name] && Boolean(errors[field.name])}
+              helperText={errors[field.name]}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <React.Fragment>
+                    {loading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
+                    {params.InputProps.endAdornment}
+                  </React.Fragment>
+                ),
+              }}
+            />
+          )}
+        />
+      )}
     </div>
   );
 }
