@@ -1,16 +1,15 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState } from 'react'
 import './Room.css'
 import RoomList from './RoomList';
 import RoomsArea from './RoomsArea';
-import axios from 'axios';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import configData from '../../config/config.json'
-const RoomDashBoard = ({ auth: { isAuthenticated, user } }) => {
-    const [rooms, setRooms] = useState([]);
+import { getAllRooms } from "../../redux/actions/room";
+
+const RoomDashBoard = (props) => {
+    const { auth: { isAuthenticated, user } ,  getAllRooms} = props;
     const [loadingData, setLoadingData] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState(null)
-
 
     const handleRoomSelection = (selectedRoom) => {
         console.log(selectedRoom);
@@ -29,9 +28,7 @@ const RoomDashBoard = ({ auth: { isAuthenticated, user } }) => {
         setLoadingData(true);
         console.log(user);
         if (isAuthenticated === true) {
-            const { data } = await axios.get(`${configData.SERVER_URL}/api/users/myRooms`);
-            setRooms(data);
-            console.log(data);
+            getAllRooms()
         }
         setLoadingData(false);
     }
@@ -39,7 +36,7 @@ const RoomDashBoard = ({ auth: { isAuthenticated, user } }) => {
     return (
         <div className="room_dashboard">
             {loadingData ? <span>Loading...</span> : <>
-                <RoomList value={rooms} onRoomSelection={handleRoomSelection} />
+                <RoomList onRoomSelection={handleRoomSelection} />
                 {!selectedRoom ? <div className="notSelectedRoomDiv">
                     <h1>Welcome</h1>
                     <p>Click on a Room name to start chatting!</p>
@@ -54,6 +51,6 @@ RoomDashBoard.prototypes = {
 };
 
 const mapStateToProps = state => ({
-    auth: state.auth
+    auth: state.auth,
 })
-export default connect(mapStateToProps, {})(RoomDashBoard);
+export default connect(mapStateToProps, {getAllRooms})(RoomDashBoard);

@@ -15,3 +15,11 @@ export const LOGOUT = 'LOGOUT';
 export const NEW_NOTIFICATION = "NEW_NOTIFICATION";
 export const REMOVE_NOTIFICATION = "REMOVE_NOTIFICATION";
 
+//Room 
+export const   GET_ALL_ROOMS = "GET_ALL_ROOMS";
+export const   GET_ROOM_DETAILS = "GET_ROOM_DETAILS";
+export const   ADD_ROOM = "ADD_ROOM";
+export const   EDIT_ROOM = "EDIT_ROOM";
+export const   DELETE_ROOM = "DELETE_ROOM";
+export const   SET_SELECTED_ROOM = "SET_SELECTED_ROOM";
+

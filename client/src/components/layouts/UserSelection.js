@@ -45,13 +45,11 @@ function UserSelection({
   const loading = open && users.length === 0;
 
   const handleChange = (value) => {
-    // this is going to call setFieldValue and manually update values.topcis
     props.onChange("users", value);
   };
 
   useEffect(() => {
     _fetchdefaultUsers().then((_) => setDefaultUsersLoading(false));
-    // _fetchAllUsers();
   }, []);
 
   useEffect(() => {

@@ -19,21 +19,12 @@ import { useFormik, Field, FormikProvider } from "formik";
 import * as yup from "yup";
 import { FormHelperText } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-// import ChannelService from "../../service/ChannelService";
-import { makeStyles } from "@mui/styles";
-// import { useSelector } from "react-redux";
 import UserSelection from "../layouts/UserSelection";
-import axios from "axios";
-import configData from "../../config/config.json";
+import { addRoomDetails } from "../../redux/actions/room";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    "& .MuiTextField-root": {
-      margin: "8px",
-      width: "25ch",
-    },
-  },
-}));
+
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -104,14 +95,9 @@ const channelFormValidationScheme = yup.object({
     .required("Channel Type is required"),
 });
 
-export default function NewRoom({
-  isAddChannelDialogOpen,
-  onAddChannelDialogClose,
-}) {
-  // const classes = useStyles();
+function NewRoom({ isAddChannelDialogOpen, onAddChannelDialogClose, addRoomDetails }) {
   const [open, setOpen] = React.useState(isAddChannelDialogOpen);
   const [isDataLoading, setDataLoading] = React.useState(false);
-  // const loggedInUser = useSelector((state) => state.authentication.user);
 
   const handleClose = () => {
     setOpen(false);
@@ -123,12 +109,12 @@ export default function NewRoom({
     _createNewRoom(data);
   };
   const _createNewRoom = async (data) => {
-    const res = await axios.post(`${configData.SERVER_URL}/api/rooms`, {
+      addRoomDetails({
       roomName: data.roomName,
       roomType: data.roomType,
       users: data.users.map((u) => u._id),
     });
-    //console.log(res);
+
     setDataLoading(false);
     setOpen(false);
     onAddChannelDialogClose(true);
@@ -217,11 +203,6 @@ export default function NewRoom({
                   </FormControl>
                 </Grid>
               </Grid>
-              {/* <div>
-              <Backdrop className={classes.backdrop} open={isDataLoading}>
-                <CircularProgress color="inherit" />
-              </Backdrop>
-            </div> */}
               {isDataLoading && <CircularProgress color="inherit" />}
             </DialogContent>
             <DialogActions>
@@ -248,3 +229,14 @@ export default function NewRoom({
     </div>
   );
 }
+
+NewRoom.propTypes = {
+  isAddChannelDialogOpen: PropTypes.bool.isRequired,
+  onAddChannelDialogClose: PropTypes.func.isRequired,
+};
+const mapStateToProps = (state) => ({
+ 
+});
+export default connect(mapStateToProps, { addRoomDetails })(
+  NewRoom
+);
