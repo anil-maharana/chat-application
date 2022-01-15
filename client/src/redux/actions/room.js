@@ -4,6 +4,7 @@ import {
   ADD_ROOM,
   EDIT_ROOM,
   DELETE_ROOM,
+  SET_ALERT,
 } from "../constants";
 import axios from "axios";
 import configData from "../../config/config.json";

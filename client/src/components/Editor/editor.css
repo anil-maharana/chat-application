@@ -1,10 +1,13 @@
 .citryleditor {
   margin: 10px auto;
-  max-width: 936px;
+  /* max-width: 936px; */
+  width: 100%;
 }
 
 .draft-editor-wrapper {
   border: 1px solid #ccc;
+  border-bottom: 2px solid #1976d2;
+  background: white;
 }
 
 .public-DraftEditorPlaceholder-inner {
@@ -14,9 +17,11 @@
 }
 
 div.DraftEditor-root {
-  border: 1px solid #ccc;
+  /* border: 1px solid #ccc;
   height: 50px;
   overflow-y: auto;
+  text-align: left; */
+  overflow: auto;
   text-align: left;
 }
 div.DraftEditor-editorContainer,

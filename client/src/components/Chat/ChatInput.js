@@ -8,7 +8,6 @@ import Grid from '@mui/material/Grid';
 import SendIcon from "@mui/icons-material/Send";
 import CitryEditor from '../Editor/citryleditor';
 import { useState, useRef } from "react";
-import MyEditor from '../AnilEditor/MyEditor'
 import { Box } from '@mui/system';
 import { Paper, TextField } from '@mui/material';
 // import { ChatContext } from "../../contexts/ChatContext";
@@ -53,7 +52,7 @@ const ChatInput = ({ onMessageSubmit }) => {
                     <AttachFileIcon />
                     <CameraAltIcon />
                 </div> */}
-                <CitryEditor ref={citrylEditorRef} onEditorChange={(val) => { console.log(val) }}></CitryEditor>
+                <CitryEditor ref={citrylEditorRef} onEditorChange={(val) => {  }} onSubmitMessage={(val)=>{ onMessageSubmit(val)}}></CitryEditor>
                 {/* <Grid container spacing={2} alignItems="center">
                     <Grid item xs>
                         <CitryEditor ref={citrylEditorRef}></CitryEditor>
@@ -66,9 +65,9 @@ const ChatInput = ({ onMessageSubmit }) => {
                 </Grid> */}
                 {/* <MyEditor /> */}
             </div>
-            <div className="chatinput__icons">
+            {/* <div className="chatinput__icons">
                 <SendIcon />
-            </div>
+            </div> */}
             {/* <MyEditor /> */}
         </div>
         // <Box sx={{ background: 'white',minHeight:'120px' }}>

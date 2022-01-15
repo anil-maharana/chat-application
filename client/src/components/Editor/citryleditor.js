@@ -1,41 +1,63 @@
-import React from 'react';
-import './editor.css';
-import { Editor, EditorState, RichUtils, getDefaultKeyBinding, KeyBindingUtil, Modifier, CompositeDecorator, SelectionState } from 'draft-js';
+import React from "react";
+import "./editor.css";
+import {
+  Editor,
+  EditorState,
+  RichUtils,
+  getDefaultKeyBinding,
+  KeyBindingUtil,
+  Modifier,
+  CompositeDecorator,
+  SelectionState,
+  convertToRaw,
+} from "draft-js";
+import IconButton from "@mui/material/IconButton";
+import { insertCharacter, keyBindingFunction } from "./editorutils";
+import {
+  People,
+  Mention,
+  updateAutocompletePosition,
+  getCaretPosition,
+  getCurrentBlock,
+  getText,
+} from "./mentionutils";
+import { convertToHTML } from "draft-convert";
+import SendIcon from "@mui/icons-material/Send";
 
-import { insertCharacter, keyBindingFunction } from './editorutils';
-import { People, Mention, updateAutocompletePosition, getCaretPosition, getCurrentBlock, getText } from './mentionutils';
-import { convertToHTML } from 'draft-convert';
+import Toolbar from "./toolbar";
 
-import Toolbar from './toolbar';
-
-const people = [{
-  id: 'annette1',
-  name: 'Annette Cartwright'
-}, {
-  id: 'steve123',
-  name: 'Steve Liles'
-}, {
-  id: 'jojo96',
-  name: 'Jo Orange'
-}, {
-  id: 'markbame2000',
-  name: 'Mark Martirez'
-}, {
-  id: 'aliassam',
-  name: 'Ali Assam'
-}, {
-  id: 'justjane',
-  name: 'Jane Justin'
-}]
-
-
-
+const people = [
+  {
+    id: "annette1",
+    name: "Annette Cartwright",
+  },
+  {
+    id: "steve123",
+    name: "Steve Liles",
+  },
+  {
+    id: "jojo96",
+    name: "Jo Orange",
+  },
+  {
+    id: "markbame2000",
+    name: "Mark Martirez",
+  },
+  {
+    id: "aliassam",
+    name: "Ali Assam",
+  },
+  {
+    id: "justjane",
+    name: "Jane Justin",
+  },
+];
 
 class CitrylEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      editorState: EditorState.createEmpty()
+      editorState: EditorState.createEmpty(),
     };
 
     this.onChange = this.onChange.bind(this);
@@ -44,19 +66,18 @@ class CitrylEditor extends React.Component {
     this.toggleBlockType = this.toggleBlockType.bind(this);
     this.addEmoji = this.addEmoji.bind(this);
 
-    this.handleChange = this.handleChange.bind(this)
-    this.handleBeforeInput = this.handleBeforeInput.bind(this)
-    this.acceptSelectedPerson = this.acceptSelectedPerson.bind(this)
-    this.handleReturn = this.handleReturn.bind(this)
-    this.handleTab = this.handleTab.bind(this)
-    this.handleEscape = this.handleEscape.bind(this)
-    this.handleUpArrow = this.handleUpArrow.bind(this)
-    this.handleDownArrow = this.handleDownArrow.bind(this)
-    this.confirmMention = this.confirmMention.bind(this)
-    this.handleClick = this.handleClick.bind(this)
-    this.getHTML = this.getHTML.bind(this)
-
-
+    this.handleChange = this.handleChange.bind(this);
+    this.handleBeforeInput = this.handleBeforeInput.bind(this);
+    this.acceptSelectedPerson = this.acceptSelectedPerson.bind(this);
+    this.handleReturn = this.handleReturn.bind(this);
+    this.handleTab = this.handleTab.bind(this);
+    this.handleEscape = this.handleEscape.bind(this);
+    this.handleUpArrow = this.handleUpArrow.bind(this);
+    this.handleDownArrow = this.handleDownArrow.bind(this);
+    this.confirmMention = this.confirmMention.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.getHTML = this.getHTML.bind(this);
+    this.handleSendMessage = this.handleSendMessage.bind(this);
   }
 
   getHTML() {
@@ -64,7 +85,7 @@ class CitrylEditor extends React.Component {
   }
   resetEditor() {
     this.setState({
-      editorState: EditorState.createEmpty()
+      editorState: EditorState.createEmpty(),
     });
   }
 
@@ -75,93 +96,118 @@ class CitrylEditor extends React.Component {
   }
 
   addEmoji = (emoji) => {
-    const newEditorState = insertCharacter(emoji.native, this.state.editorState);
+    const newEditorState = insertCharacter(
+      emoji.native,
+      this.state.editorState
+    );
     this.setState({
-      editorState: newEditorState
+      editorState: newEditorState,
     });
-
-  }
+  };
 
   handleKeyCommand(command) {
     // inline formatting key commands handles bold, italic, code, underline
-    var editorState = RichUtils.handleKeyCommand(this.state.editorState, command);
+    var editorState = RichUtils.handleKeyCommand(
+      this.state.editorState,
+      command
+    );
 
-    if (!editorState && command === 'strikethrough') {
-      editorState = RichUtils.toggleInlineStyle(this.state.editorState, 'STRIKETHROUGH');
+    if (!editorState && command === "strikethrough") {
+      editorState = RichUtils.toggleInlineStyle(
+        this.state.editorState,
+        "STRIKETHROUGH"
+      );
     }
 
-    if (!editorState && command === 'blockquote') {
-      editorState = RichUtils.toggleBlockType(this.state.editorState, 'blockquote');
+    if (!editorState && command === "blockquote") {
+      editorState = RichUtils.toggleBlockType(
+        this.state.editorState,
+        "blockquote"
+      );
     }
 
-    if (!editorState && command === 'ordered-list') {
-      editorState = RichUtils.toggleBlockType(this.state.editorState, 'ordered-list-item');
+    if (!editorState && command === "ordered-list") {
+      editorState = RichUtils.toggleBlockType(
+        this.state.editorState,
+        "ordered-list-item"
+      );
     }
 
-    if (!editorState && command === 'unordered-list') {
-      editorState = RichUtils.toggleBlockType(this.state.editorState, 'unordered-list-item');
+    if (!editorState && command === "unordered-list") {
+      editorState = RichUtils.toggleBlockType(
+        this.state.editorState,
+        "unordered-list-item"
+      );
     }
 
     if (editorState) {
       this.setState({ editorState });
-      return 'handled';
+      return "handled";
     }
 
-    return 'not-handled';
+    return "not-handled";
   }
 
   toggleInlineStyle(event) {
     event.preventDefault();
 
-    let style = event.currentTarget.getAttribute('data-style');
+    let style = event.currentTarget.getAttribute("data-style");
     this.setState({
-      editorState: RichUtils.toggleInlineStyle(this.state.editorState, style)
+      editorState: RichUtils.toggleInlineStyle(this.state.editorState, style),
     });
   }
 
   toggleBlockType(event) {
     event.preventDefault();
 
-    let block = event.currentTarget.getAttribute('data-block');
+    let block = event.currentTarget.getAttribute("data-block");
     this.setState({
-      editorState: RichUtils.toggleBlockType(this.state.editorState, block)
+      editorState: RichUtils.toggleBlockType(this.state.editorState, block),
     });
   }
   //#endregion Editor
 
   //#region MentionMethods
   handleChange(editorState) {
-    const { mention } = this.state
+    const { mention } = this.state;
     if (mention) {
-      const caret = getCaretPosition(editorState)
+      const caret = getCaretPosition(editorState);
       if (caret > mention.offset) {
-        const mentionText = getText(editorState, mention.offset + 1, caret).toLowerCase()
-        const candidates = people.filter(person => person.name.toLowerCase().startsWith(mentionText))
+        const mentionText = getText(
+          editorState,
+          mention.offset + 1,
+          caret
+        ).toLowerCase();
+        const candidates = people.filter((person) =>
+          person.name.toLowerCase().startsWith(mentionText)
+        );
         this.setState({
           editorState,
           mention: {
             ...mention,
             selectedIndex: 0,
-            people: candidates
-          }
-        })
+            people: candidates,
+          },
+        });
       } else {
         // last change deleted the @ character, so exit mention mode
-        this.setState({ editorState, mention: undefined })
+        this.setState({ editorState, mention: undefined });
         this.props.onEditorChange(editorState.getCurrentContent());
       }
     } else {
-      this.setState({ editorState })
-      this.props.onEditorChange(editorState.getCurrentContent().conte);
+      this.setState({ editorState });
+      this.props.onEditorChange(editorState.getCurrentContent());
     }
   }
   handleBeforeInput(ch, editorState) {
-    const { mention } = this.state
+    const { mention } = this.state;
     if (mention) {
       // ???
     } else {
-      if (ch === '@') {
-        console.log(updateAutocompletePosition(this._editor.editorContainer, editorState));
+      if (ch === "@") {
+        console.log(
+          updateAutocompletePosition(this._editor.editorContainer, editorState)
+        );
         // enter "mention mode"
         this.setState({
           mention: {
@@ -169,48 +215,51 @@ class CitrylEditor extends React.Component {
             selectedIndex: 0,
             offset: getCaretPosition(editorState),
             //position: getMentionPosition(editorState)
-            position: updateAutocompletePosition(this._editor.editorContainer, editorState)
-          }
-        })
+            position: updateAutocompletePosition(
+              this._editor.editorContainer,
+              editorState
+            ),
+          },
+        });
       }
     }
-    return false
+    return false;
   }
   handleEscape(ev) {
     if (this.state.mention) {
-      this.setState({ mention: undefined })
-      ev.preventDefault()
+      this.setState({ mention: undefined });
+      ev.preventDefault();
     }
   }
   acceptSelectedPerson(ev) {
-    const { mention } = this.state
+    const { mention } = this.state;
     if (mention) {
       if (mention.people && mention.people.length > mention.selectedIndex) {
-        let person = mention.people[mention.selectedIndex]
-        this.confirmMention(person)
+        let person = mention.people[mention.selectedIndex];
+        this.confirmMention(person);
       } else {
-        this.setState({ mention: undefined })
+        this.setState({ mention: undefined });
       }
-      ev.preventDefault()
-      return true
+      ev.preventDefault();
+      return true;
     }
-    return false
+    return false;
   }
   handleTab(ev) {
-    this.acceptSelectedPerson(ev)
+    this.acceptSelectedPerson(ev);
   }
   handleReturn(ev, editorState) {
-    return this.acceptSelectedPerson(ev)
+    return this.acceptSelectedPerson(ev);
   }
   handleUpArrow(ev) {
     if (this.state.mention) {
       this.setState(({ mention }) => ({
         mention: {
           ...mention,
-          selectedIndex: Math.max(0, mention.selectedIndex - 1)
-        }
-      }))
-      ev.preventDefault()
+          selectedIndex: Math.max(0, mention.selectedIndex - 1),
+        },
+      }));
+      ev.preventDefault();
     }
   }
   handleDownArrow(ev) {
@@ -218,30 +267,30 @@ class CitrylEditor extends React.Component {
       this.setState(({ mention }) => ({
         mention: {
           ...mention,
-          selectedIndex: Math.min(mention.selectedIndex + 1, people.length - 1)
-        }
-      }))
-      ev.preventDefault()
+          selectedIndex: Math.min(mention.selectedIndex + 1, people.length - 1),
+        },
+      }));
+      ev.preventDefault();
     }
   }
   handleClick(ev) {
     if (this.state.mention) {
-      setTimeout(() => this.setState({ mention: undefined }))
+      setTimeout(() => this.setState({ mention: undefined }));
     }
-    this._editor.focus()
+    this._editor.focus();
   }
   confirmMention(person) {
-    const { editorState, mention } = this.state
-    const contentState = editorState.getCurrentContent()
+    const { editorState, mention } = this.state;
+    const contentState = editorState.getCurrentContent();
     const contentStateWithEntity = contentState.createEntity(
-      'MENTION',
-      'IMMUTABLE',
+      "MENTION",
+      "IMMUTABLE",
       person
-    )
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey()
-    const block = getCurrentBlock(editorState)
-    const blockKey = block.getKey()
-    const mentionText = '@' + person.name
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    const block = getCurrentBlock(editorState);
+    const blockKey = block.getKey();
+    const mentionText = "@" + person.name;
     const contentStateWithReplacedText = Modifier.replaceText(
       contentStateWithEntity,
       new SelectionState({
@@ -250,12 +299,12 @@ class CitrylEditor extends React.Component {
         focusKey: blockKey,
         focusOffset: getCaretPosition(editorState),
         isBackward: false,
-        hasFocus: true
+        hasFocus: true,
       }),
       mentionText,
-      ['link', 'BOLD'],
+      ["link", "BOLD"],
       entityKey
-    )
+    );
     const newEditorState = EditorState.set(editorState, {
       currentContent: contentStateWithReplacedText,
       selection: new SelectionState({
@@ -264,21 +313,27 @@ class CitrylEditor extends React.Component {
         focusKey: blockKey,
         focusOffset: mention.offset + mentionText.length,
         isBackward: false,
-        hasFocus: true
-      })
-    })
+        hasFocus: true,
+      }),
+    });
     setTimeout(() => {
       this.setState({
         mention: undefined,
-        editorState: newEditorState
-      })
-    }, 0)
+        editorState: newEditorState,
+      });
+    }, 0);
   }
 
-
-
   //#endregion
-
+  handleSendMessage() {
+    // console.log(this.state.editorState.getCurrentContent());
+    const content = this.state.editorState.getCurrentContent();
+    const data_html = convertToHTML(content);
+    this.props.onSubmitMessage(data_html);
+    this.setState({
+      editorState: EditorState.createEmpty(),
+    });
+  }
   render() {
     const { mention, editorState } = this.state;
     return (
@@ -286,7 +341,7 @@ class CitrylEditor extends React.Component {
         <div className="draft-editor-wrapper">
           <Editor
             editorState={editorState}
-            ref={ref => this._editor = ref}
+            ref={(ref) => (this._editor = ref)}
             handleKeyCommand={this.handleKeyCommand}
             keyBindingFn={keyBindingFunction}
             onChange={this.handleChange}
@@ -297,23 +352,31 @@ class CitrylEditor extends React.Component {
             onUpArrow={this.handleUpArrow}
             onDownArrow={this.handleDownArrow}
           />
-          {mention ?
+          {mention ? (
             <People
-              {...(mention.position)}
+              {...mention.position}
               people={mention.people}
               selectedIndex={mention.selectedIndex}
-              onClick={this.confirmMention} />
-            :
-            null
-          }
+              onClick={this.confirmMention}
+            />
+          ) : null}
         </div>
-        <div>
-          <Toolbar editorState={this.state.editorState}
-            toggleInlineStyle={this.toggleInlineStyle}
-            toggleBlockType={this.toggleBlockType}
-            addEmoji={this.addEmoji} ></Toolbar>
-        </div>
-        <div>
+        <div style={{ display: "flex" }}>
+          <div style={{ flex: 1 }}>
+            <Toolbar
+              editorState={this.state.editorState}
+              toggleInlineStyle={this.toggleInlineStyle}
+              toggleBlockType={this.toggleBlockType}
+              addEmoji={this.addEmoji}
+            ></Toolbar>
+          </div>
+          <IconButton
+            aria-label="sendMessae"
+            color="primary"
+            onClick={this.handleSendMessage}
+          >
+            <SendIcon />
+          </IconButton>
         </div>
       </div>
     );
